@@ -1,4 +1,4 @@
-git remote add origin https://github.com/Aryan22N/PharmaBrain-prototype_1.gitimport React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from '../../../lib/router';
 import { useHealthStore } from '../../../lib/health-store';
 import { analyseFile } from '../../../lib/gemini-analysis';
