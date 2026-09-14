@@ -1,0 +1,6 @@
+{
+  "name": "Patient-Centric Digital Medical Record",
+  "description": "A clickable, presentation-ready healthcare demo MVP built on dummy data for Rahul Sharma with patient and doctor portals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
