@@ -158,8 +158,8 @@ export const DocumentUploadPage: React.FC = () => {
               type="button"
               onClick={() => setDocumentType('PRESCRIPTION')}
               className={`py-2.5 px-4 rounded-lg border font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${documentType === 'PRESCRIPTION'
-                  ? 'bg-teal-50 border-teal-600 text-teal-950 shadow-xs'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                ? 'bg-teal-50 border-teal-600 text-teal-950 shadow-xs'
+                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                 }`}
             >
               <FileText className="w-4 h-4 text-teal-700" />
@@ -169,8 +169,8 @@ export const DocumentUploadPage: React.FC = () => {
               type="button"
               onClick={() => setDocumentType('REPORT')}
               className={`py-2.5 px-4 rounded-lg border font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${documentType === 'REPORT'
-                  ? 'bg-teal-50 border-teal-600 text-teal-950 shadow-xs'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                ? 'bg-teal-50 border-teal-600 text-teal-950 shadow-xs'
+                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                 }`}
             >
               <FileCheck className="w-4 h-4 text-teal-700" />
