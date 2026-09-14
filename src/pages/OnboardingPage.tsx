@@ -14,7 +14,20 @@ import {
   HeartPulse,
   Activity,
   ShieldAlert,
+  Plus,
+  Trash2,
+  SkipForward,
+  Stethoscope,
+  Check,
+  MapPin,
 } from 'lucide-react';
+
+interface CustomCondition {
+  id: string;
+  name: string;
+  year: string;
+  details: string;
+}
 
 export const OnboardingPage: React.FC = () => {
   const { navigate } = useRouter();
@@ -31,6 +44,10 @@ export const OnboardingPage: React.FC = () => {
     phone: patientProfile.phone,
     emergencyName: patientProfile.emergencyContact.name,
     emergencyPhone: patientProfile.emergencyContact.phone,
+    address: 'Flat 402, Sunshine Heights, MG Road',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    pincode: '400001',
   });
 
   const [conditions, setConditions] = useState({
@@ -43,6 +60,60 @@ export const OnboardingPage: React.FC = () => {
     currentBp: '146/92 mmHg',
     hasDyslipidemia: true,
   });
+
+  // Custom added conditions list
+  const [customConditions, setCustomConditions] = useState<CustomCondition[]>([
+    {
+      id: 'c-1',
+      name: 'Dyslipidemia / High Cholesterol',
+      year: '2022',
+      details: 'LDL: 142 mg/dL • Statin therapy recommended',
+    },
+  ]);
+
+  const [showAddCustom, setShowAddCustom] = useState(false);
+  const [newCondName, setNewCondName] = useState('');
+  const [newCondYear, setNewCondYear] = useState('');
+  const [newCondDetails, setNewCondDetails] = useState('');
+
+  const handleAddCustomCondition = () => {
+    if (!newCondName.trim()) return;
+    setCustomConditions([
+      ...customConditions,
+      {
+        id: `c-${Date.now()}`,
+        name: newCondName.trim(),
+        year: newCondYear.trim() || new Date().getFullYear().toString(),
+        details: newCondDetails.trim() || 'Logged by patient',
+      },
+    ]);
+    setNewCondName('');
+    setNewCondYear('');
+    setNewCondDetails('');
+    setShowAddCustom(false);
+    showToast(`Added condition: ${newCondName.trim()}`);
+  };
+
+  const handleQuickAddPreset = (name: string, defaultDetails: string) => {
+    if (customConditions.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+      showToast(`${name} is already added`);
+      return;
+    }
+    setCustomConditions([
+      ...customConditions,
+      {
+        id: `c-${Date.now()}`,
+        name,
+        year: new Date().getFullYear().toString(),
+        details: defaultDetails,
+      },
+    ]);
+    showToast(`Added ${name}`);
+  };
+
+  const handleRemoveCustomCondition = (id: string) => {
+    setCustomConditions(customConditions.filter((c) => c.id !== id));
+  };
 
   const [history, setHistory] = useState({
     surgeries: 'None recorded',
@@ -211,17 +282,100 @@ export const OnboardingPage: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {/* Address & Location Information */}
+              <div className="pt-3 border-t border-slate-200 space-y-3">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-teal-700" />
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Residential Address & Location Details
+                  </h4>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    House / Building No., Street & Area Address
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Flat 402, Sunshine Heights, MG Road"
+                    value={basicInfo.address}
+                    onChange={(e) => setBasicInfo({ ...basicInfo, address: e.target.value })}
+                    className="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-white font-medium"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">City / District</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Mumbai"
+                      value={basicInfo.city}
+                      onChange={(e) => setBasicInfo({ ...basicInfo, city: e.target.value })}
+                      className="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-white font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">State / Province</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Maharashtra"
+                      value={basicInfo.state}
+                      onChange={(e) => setBasicInfo({ ...basicInfo, state: e.target.value })}
+                      className="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-white font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Pincode / ZIP Code</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 400001"
+                      value={basicInfo.pincode}
+                      onChange={(e) => setBasicInfo({ ...basicInfo, pincode: e.target.value })}
+                      className="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-white font-medium"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
           {/* STEP 2: Existing Conditions with Conditional Fields */}
           {step === 2 && (
             <div className="space-y-6">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="text-base font-bold text-slate-900">Step 2: Existing Diagnosed Conditions</h3>
-                <p className="text-xs text-slate-500">
-                  Select existing conditions to open conditional clinical detail fields.
-                </p>
+              <div className="border-b border-slate-200 pb-3 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Step 2: Existing Diagnosed Conditions</h3>
+                  <p className="text-xs text-slate-500">
+                    Select existing conditions to open conditional clinical detail fields, or add more custom conditions.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConditions({
+                      hasDiabetes: false,
+                      diabetesType: '',
+                      diabetesYear: '',
+                      currentHba1c: '',
+                      hasHypertension: false,
+                      hypertensionYear: '',
+                      currentBp: '',
+                      hasDyslipidemia: false,
+                    });
+                    setCustomConditions([]);
+                    showToast('Skipped Step 2: No continuous medications or active conditions logged');
+                    handleNext();
+                  }}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <SkipForward className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Skip if no medication in continuation</span>
+                </button>
               </div>
 
               {/* Diabetes block */}
@@ -235,7 +389,7 @@ export const OnboardingPage: React.FC = () => {
                     type="checkbox"
                     checked={conditions.hasDiabetes}
                     onChange={(e) => setConditions({ ...conditions, hasDiabetes: e.target.checked })}
-                    className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
+                    className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
                   />
                 </div>
 
@@ -247,7 +401,7 @@ export const OnboardingPage: React.FC = () => {
                         type="text"
                         value={conditions.diabetesType}
                         onChange={(e) => setConditions({ ...conditions, diabetesType: e.target.value })}
-                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white"
+                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
                       />
                     </div>
                     <div>
@@ -256,7 +410,7 @@ export const OnboardingPage: React.FC = () => {
                         type="text"
                         value={conditions.diabetesYear}
                         onChange={(e) => setConditions({ ...conditions, diabetesYear: e.target.value })}
-                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white"
+                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
                       />
                     </div>
                     <div>
@@ -265,7 +419,7 @@ export const OnboardingPage: React.FC = () => {
                         type="text"
                         value={conditions.currentHba1c}
                         onChange={(e) => setConditions({ ...conditions, currentHba1c: e.target.value })}
-                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white"
+                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
                       />
                     </div>
                   </div>
@@ -283,7 +437,7 @@ export const OnboardingPage: React.FC = () => {
                     type="checkbox"
                     checked={conditions.hasHypertension}
                     onChange={(e) => setConditions({ ...conditions, hasHypertension: e.target.checked })}
-                    className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
+                    className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
                   />
                 </div>
 
@@ -295,7 +449,7 @@ export const OnboardingPage: React.FC = () => {
                         type="text"
                         value={conditions.hypertensionYear}
                         onChange={(e) => setConditions({ ...conditions, hypertensionYear: e.target.value })}
-                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white"
+                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
                       />
                     </div>
                     <div>
@@ -304,9 +458,151 @@ export const OnboardingPage: React.FC = () => {
                         type="text"
                         value={conditions.currentBp}
                         onChange={(e) => setConditions({ ...conditions, currentBp: e.target.value })}
-                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white"
+                        className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
                       />
                     </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Custom Conditions Section */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Stethoscope className="w-4 h-4 text-teal-600" />
+                    <span className="text-xs font-bold text-slate-900">Additional / Other Diagnosed Conditions</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCustom(!showAddCustom)}
+                    className="text-xs text-teal-700 font-bold hover:text-teal-800 flex items-center gap-1 cursor-pointer bg-teal-50 px-2.5 py-1 rounded border border-teal-200"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Custom Condition</span>
+                  </button>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="text-[11px] text-slate-500 self-center font-medium">Quick Presets:</span>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAddPreset('Hypothyroidism', 'TSH: 4.2 uIU/mL • Levothyroxine therapy')}
+                    className="px-2.5 py-1 rounded bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 text-[11px] font-medium transition-colors cursor-pointer"
+                  >
+                    + Hypothyroidism
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAddPreset('Asthma / COPD', 'Maintenance inhaler twice daily')}
+                    className="px-2.5 py-1 rounded bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 text-[11px] font-medium transition-colors cursor-pointer"
+                  >
+                    + Asthma / COPD
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAddPreset('GERD / Acid Reflux', 'Antacid therapy before breakfast')}
+                    className="px-2.5 py-1 rounded bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 text-[11px] font-medium transition-colors cursor-pointer"
+                  >
+                    + GERD / Acid Reflux
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAddPreset('Chronic Kidney Disease', 'eGFR: 58 mL/min • Stage 3a')}
+                    className="px-2.5 py-1 rounded bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 text-[11px] font-medium transition-colors cursor-pointer"
+                  >
+                    + CKD
+                  </button>
+                </div>
+
+                {/* Inline Custom Condition Input Form */}
+                {showAddCustom && (
+                  <div className="p-4 bg-teal-50/70 border border-teal-300 rounded-lg space-y-3 animate-fade-in shadow-xs">
+                    <h4 className="text-xs font-bold text-teal-950 flex items-center gap-1.5">
+                      <Plus className="w-4 h-4 text-teal-700" />
+                      <span>Log Additional Diagnosed Condition</span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-700 mb-1">Condition Name *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Hypothyroidism, Osteoarthritis..."
+                          value={newCondName}
+                          onChange={(e) => setNewCondName(e.target.value)}
+                          className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-700 mb-1">Diagnosis Year</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 2022"
+                          value={newCondYear}
+                          onChange={(e) => setNewCondYear(e.target.value)}
+                          className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-700 mb-1">Clinical Vitals / Notes</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. TSH level 4.2, Mild symptoms..."
+                          value={newCondDetails}
+                          onChange={(e) => setNewCondDetails(e.target.value)}
+                          className="w-full text-xs p-2 rounded border border-slate-300 bg-white font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddCustom(false)}
+                        className="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-xs font-semibold rounded hover:bg-slate-50 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAddCustomCondition}
+                        className="px-4 py-1.5 bg-teal-700 text-white text-xs font-bold rounded hover:bg-teal-800 shadow-xs cursor-pointer flex items-center gap-1"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Save Condition</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rendered Custom Conditions List */}
+                {customConditions.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    {customConditions.map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between gap-3 shadow-2xs"
+                      >
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-900">{item.name}</span>
+                            <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">
+                              Diagnosed: {item.year}
+                            </span>
+                          </div>
+                          {item.details && (
+                            <p className="text-[11px] text-slate-500 font-medium">{item.details}</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCustomCondition(item.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                          title="Remove condition"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -316,11 +612,25 @@ export const OnboardingPage: React.FC = () => {
           {/* STEP 3: Major History */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="text-base font-bold text-slate-900">Step 3: Major Past Medical History</h3>
-                <p className="text-xs text-slate-500">
-                  Record documented surgical interventions, known drug allergies, and social risk factors.
-                </p>
+              <div className="border-b border-slate-200 pb-3 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Step 3: Major Past Medical History</h3>
+                  <p className="text-xs text-slate-500">
+                    Record documented surgical interventions, known drug allergies, and social risk factors.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    showToast('Skipped Step 3: No major past medical history or allergies recorded');
+                    handleNext();
+                  }}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <SkipForward className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Skip this step</span>
+                </button>
               </div>
 
               <div>
@@ -455,7 +765,7 @@ export const OnboardingPage: React.FC = () => {
           )}
 
           {/* Stepper Navigation Buttons */}
-          <div className="pt-6 border-t border-slate-200 flex items-center justify-between mt-6">
+          <div className="pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 mt-6">
             {step > 1 ? (
               <button
                 type="button"
@@ -469,26 +779,67 @@ export const OnboardingPage: React.FC = () => {
               <div />
             )}
 
-            {step < 4 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-              >
-                <span>Continue</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <button
-                id="btn-confirm-initial-context"
-                type="button"
-                onClick={handleFinish}
-                className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-lg flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
-              >
-                <span>Confirm Initial Health Context</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {step === 2 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConditions({
+                      hasDiabetes: false,
+                      diabetesType: '',
+                      diabetesYear: '',
+                      currentHba1c: '',
+                      hasHypertension: false,
+                      hypertensionYear: '',
+                      currentBp: '',
+                      hasDyslipidemia: false,
+                    });
+                    setCustomConditions([]);
+                    showToast('Skipped Step 2 (No active conditions recorded)');
+                    handleNext();
+                  }}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1 border border-slate-200"
+                >
+                  <span>Skip (No continuous medication)</span>
+                  <SkipForward className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              )}
+
+              {step === 3 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    showToast('Skipped Step 3 (No past history recorded)');
+                    handleNext();
+                  }}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1 border border-slate-200"
+                >
+                  <span>Skip (No major past history)</span>
+                  <SkipForward className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              )}
+
+              {step < 4 ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                >
+                  <span>Continue</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <button
+                  id="btn-confirm-initial-context"
+                  type="button"
+                  onClick={handleFinish}
+                  className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-lg flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+                >
+                  <span>Confirm Initial Health Context</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </main>
