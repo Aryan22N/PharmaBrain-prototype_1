@@ -59,7 +59,7 @@ const apiKey =
 const configuredModel =
   (import.meta as any).env?.VITE_GEMINI_MODEL ||
   (import.meta as any).env?.GEMINI_MODEL ||
-  'gemini-2.5-flash';
+  'gemini-3.6-flash';
 
 export async function analyseFile(
   base64Data: string,
@@ -69,7 +69,7 @@ export async function analyseFile(
   // Strip data URL header if present (e.g. data:image/png;base64,...)
   const pureBase64 = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
 
-  const defaultChain = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const defaultChain = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
   const modelsToTry = Array.from(new Set([configuredModel, ...defaultChain])).filter(Boolean);
 
   const systemInstruction = `You are an expert AI medical assistant for an academic document analysis prototype called PharmaBrain.
